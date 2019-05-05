@@ -174,7 +174,7 @@ public class StatisticsController
 	{
 		List<Statistics> statistics = statisticsRepository.findAll();
 		Map<String, Object> map = new HashMap<>();
-		map.put(RATIO, statistics.stream().collect(Collectors.summingInt(x -> x.getHits())).doubleValue() / statistics.stream().collect(Collectors.summingInt(Statistics::getMisses)).doubleValue());
+		map.put(RATIO, statistics.stream().collect(Collectors.summingInt(Statistics::getHits)).doubleValue() / statistics.stream().collect(Collectors.summingInt(Statistics::getMisses)).doubleValue());
 		return map;
 	}
 
