@@ -79,7 +79,7 @@ public class MeteorologyController
 	@GetMapping(value = "/cities")
 	public Map<String, Object> getCities()
 	{
-		Map<String, Object> result = get("cities", () ->
+		return get("cities", () ->
 		{
 			List<Object> list = new ArrayList<>();
 			cityRepository.findAll().forEach(city -> list.add(Converter.ToMap(city)));
@@ -90,7 +90,6 @@ public class MeteorologyController
 				}
 			};
 		});
-		return result;
 	}
 
 	@GetMapping(value = "/meteorology", params = "day")
