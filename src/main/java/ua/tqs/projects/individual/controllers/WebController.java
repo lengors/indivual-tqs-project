@@ -14,7 +14,7 @@ public class WebController
 	private MeteorologyController meteorologyController;
 	
 	@GetMapping(value = "/")
-	public String Index(Model model)
+	public String index(Model model)
 	{
 		model.addAttribute("places", meteorologyController.getCities().get("data"));
 		return "index";
