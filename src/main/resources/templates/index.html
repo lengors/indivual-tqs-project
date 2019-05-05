@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.springframework.org/schema/mvc">
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Meteorology</title>
+<link rel="stylesheet" th:href="@{css/bootstrap.min.css}"
+	type="text/css">
+<link rel="stylesheet" th:href="@{css/all.css}" type="text/css">
+<link rel="stylesheet"
+	th:href="@{https://pro.fontawesome.com/releases/v5.8.1/css/all.css}"
+	type="text/css">
+<style>
+.weekly {
+	width: 100%;
+	display: flex;
+	margin: 0 auto;
+	overflow-x: auto;
+}
+
+.weekly .weekly-column {
+	flex-grow: 1;
+	min-width: 105px;
+	max-width: 180px;
+	vertical-align: top;
+	padding-bottom: 10px;
+	display: inline-block;
+	background-color: #efefef;
+	border-top: 2px solid #dfdfdf;
+	border-bottom: 2px solid #f8ab07;
+}
+
+.weekly .weekly-column:not(:last-child) {
+	margin-right: 2px;
+}
+
+.weekly .weekly-column .date {
+	width: 100%;
+	height: 52px;
+	display: flex;
+	padding: 4px 0;
+	font-size: 12px;
+	font-weight: bold;
+	align-items: center;
+	justify-content: center;
+	background-color: #c3c3c3;
+	border-top: 2px solid #c3c3c3;
+	border-bottom: 2px solid #c3c3c3;
+}
+
+.weekly .weekly-column .date span {
+	text-align: center;
+}
+
+.weekly .weekly-column .weather-img {
+	width: 40px;
+	display: block;
+	margin: 5px auto;
+	text-align: center;
+}
+
+.weekly .weekly-column .temp {
+	margin: auto;
+	display: block;
+	width: fit-content;
+}
+
+.weekly .weekly-column .temp span {
+	width: 32px;
+	color: white;
+	font-size: 11px;
+	padding: 1px 2px;
+	font-weight: bold;
+	text-align: center;
+	display: inline-block;
+}
+
+.weekly .weekly-column .temp .min {
+	margin-left: 5px;
+	margin-right: 2px;
+	background-color: #0080b0;
+}
+
+.weekly .weekly-column .temp .max {
+	margin-left: 2px;
+	margin-right: 5px;
+	background-color: #ffa000;
+}
+
+.weekly .weekly-column .wind-img {
+	width: 35px;
+	display: block;
+	margin: 5px auto 0;
+}
+
+.weekly .weekly-column .wind-dir {
+	text-align: center;
+}
+
+.weekly .weekly-column .prec-prob {
+	margin: 10px 0;
+	font-size: 10px;
+	text-align: center;
+}
+
+.weekly .weekly-column .prec-prob i.fa.fa-tint {
+	font-size: 14px;
+	color: #a8a8a8;
+	text-align: center;
+}
+
+.d-0 {
+	transform: rotate(0deg);
+	-o-transform: rotate(0deg);
+	-ms-transform: rotate(0deg);
+	-moz-transform: rotate(0deg);
+	-webkit-transform: rotate(0deg);
+}
+
+.d-45 {
+	transform: rotate(45deg);
+	-o-transform: rotate(45deg);
+	-ms-transform: rotate(45deg);
+	-moz-transform: rotate(45deg);
+	-webkit-transform: rotate(45deg);
+}
+
+.d-90 {
+	transform: rotate(90deg);
+	-o-transform: rotate(90deg);
+	-ms-transform: rotate(90deg);
+	-moz-transform: rotate(90deg);
+	-webkit-transform: rotate(90deg);
+}
+
+.d-135 {
+	transform: rotate(135deg);
+	-o-transform: rotate(135deg);
+	-ms-transform: rotate(135deg);
+	-moz-transform: rotate(135deg);
+	-webkit-transform: rotate(135deg);
+}
+
+.d-180 {
+	transform: rotate(180deg);
+	-o-transform: rotate(180deg);
+	-ms-transform: rotate(180deg);
+	-moz-transform: rotate(180deg);
+	-webkit-transform: rotate(180deg);
+}
+
+.d-225 {
+	transform: rotate(225deg);
+	-o-transform: rotate(225deg);
+	-ms-transform: rotate(225deg);
+	-moz-transform: rotate(225deg);
+	-webkit-transform: rotate(225deg);
+}
+
+.d-270 {
+	transform: rotate(270deg);
+	-o-transform: rotate(270deg);
+	-ms-transform: rotate(270deg);
+	-moz-transform: rotate(270deg);
+	-webkit-transform: rotate(270deg);
+}
+
+.d-315 {
+	transform: rotate(315deg);
+	-o-transform: rotate(315deg);
+	-ms-transform: rotate(315deg);
+	-moz-transform: rotate(315deg);
+	-webkit-transform: rotate(315deg);
+}
+</style>
+</head>
+<body>
+	<main role="main">
+	<div class="container py-2">
+		<div class="row text-center">
+			<h3 class="col h3">Weather 4cast</h3>
+		</div>
+		<div class="row mx-1 mx-sm-0">
+			<div class="form-group mr-2">
+				<label for="method">Method</label> <select class="form-control"
+					id="method">
+					<option value="by_day" selected>By Day</option>
+					<option value="by_city">By City</option>
+				</select>
+			</div>
+			<div class="form-group mx-2">
+				<label for="day">Day</label> <select class="form-control" id="day">
+					<option value="today" data-id="0">Today</option>
+					<option value="tomorrow" data-id="1">Tomorrow</option>
+					<option value="after-tomorrow" data-id="2">After Tomorrow</option>
+				</select>
+			</div>
+			<div class="form-group mx-2">
+				<label for="days">Number Days</label> <select class="form-control"
+					id="days">
+					<option value="1" data-id="1">1</option>
+					<option value="2" data-id="2">2</option>
+					<option value="3" data-id="3">3</option>
+					<option value="4" data-id="4">4</option>
+					<option value="5" data-id="5" selected>5</option>
+				</select>
+			</div>
+			<div class="form-group ml-0 mr-2 mx-sm-2">
+				<label for="city">City</label> <select class="form-control"
+					id="city">
+					<option th:each="place: ${places}" th:value="${place.local}"
+						th:text="${place.local}" th:data-id="${place.globalIdLocal}"></option>
+				</select>
+			</div>
+		</div>
+		<div class="row mx-1 mx-sm-0">
+			<div class="weekly" id="table_4cast"></div>
+		</div>
+	</div>
+	</main>
+	<script type="text/javascript" th:src="@{js/jquery.min.js}"></script>
+	<script type="text/javascript" th:src="@{js/bootstrap.bundle.min.js}"></script>
+	<script type="text/javascript" th:src="@{js/knockout.min.js}"></script>
+	<script>
+		function fillTableByDay () {
+			$.ajax({
+				url: '/meteorology',
+				type: 'get',
+				data: {
+					'day': $('#day option:selected').attr('data-id')
+				},
+				success: function (data) {
+					if (!('data' in data))
+						return;
+					data = data.data;
+					let $div = $('#table_4cast').empty();
+					for (let i = 0; i < data.length; i++) {
+						let prediction = data[i];
+						if ('city' in prediction) {
+							prediction.precipitaProb = parseInt(prediction.precipitaProb).toString();
+							$div.append(`
+								<div class="weekly-column">
+					                <div class="date">
+					                	<span>${prediction.city.local}</span>
+					                </div>
+					                <img class="weather-img" src="http://www.ipma.pt/bin/icons/svg/weather/w_ic_d_${prediction.idWeatherType.toString().padStart(2, '0')}anim.svg" title="${prediction.weatherType.descIdWeatherTypePT}">
+					                <div class="temp">
+					                    <span class="min">${prediction.tMax}º</span>
+					                    <span class="max">${prediction.tMin}º</span>
+					                </div>
+					                <img class="wind-img ${angleClass[prediction.predWindDir]}" src="http://www.ipma.pt/bin/icons/svg/wind/wind-${prediction.classWindSpeed.classWindSpeed}.svg" title="Vento: ${prediction.classWindSpeed.descClassWindSpeedDailyPT} de ${prediction.predWindDir}">
+					                <div class="wind-dir">${prediction.predWindDir}</div>
+					                <div class="prec-prob" title="Probabilidade precipitação: ${prediction.precipitaProb}%">
+					                    ${prediction.precipitaProb}%
+					                    <sup>
+					                        <i class="fa fa-tint" aria-hidden="true"></i>
+					                    </sup>
+					                </div>
+					            </div>
+							`);
+						}
+					}
+				},
+				error: function () {
+					alert('Invalid day!');
+				},
+			});
+		}
+		
+		function fillTableByCity () {
+			$.ajax({
+				url: '/meteorology',
+				type: 'get',
+				data: {
+					'id': $('#city option:selected').attr('data-id'),
+					'days': $('#days option:selected').attr('data-id'),
+				},
+				success: function (data) {
+					if (!('data' in data))
+						return;
+					data = data.data;
+					let $div = $('#table_4cast').empty();
+					for (let i = 0; i < data.length; i++) {
+						let prediction = data[i];
+						if ('city' in prediction) {
+							prediction.precipitaProb = parseInt(prediction.precipitaProb).toString();
+							$div.append(`
+								<div class="weekly-column">
+					                <div class="date">
+					                	<span>${prediction.forecastDate}</span>
+					                </div>
+					                <img class="weather-img" src="http://www.ipma.pt/bin/icons/svg/weather/w_ic_d_${prediction.idWeatherType.toString().padStart(2, '0')}anim.svg" title="${prediction.weatherType.descIdWeatherTypePT}">
+					                <div class="temp">
+					                    <span class="min">${prediction.tMax}º</span>
+					                    <span class="max">${prediction.tMin}º</span>
+					                </div>
+					                <img class="wind-img ${angleClass[prediction.predWindDir]}" src="http://www.ipma.pt/bin/icons/svg/wind/wind-${prediction.classWindSpeed.classWindSpeed}.svg" title="Vento: ${prediction.classWindSpeed.descClassWindSpeedDailyPT} de ${prediction.predWindDir}">
+					                <div class="wind-dir">${prediction.predWindDir}</div>
+					                <div class="prec-prob" title="Probabilidade precipitação: ${prediction.precipitaProb}%">
+					                    ${prediction.precipitaProb}%
+					                    <sup>
+					                        <i class="fa fa-tint" aria-hidden="true"></i>
+					                    </sup>
+					                </div>
+					            </div>
+							`);
+						}
+					}
+				},
+				error: function () {
+					alert('There is, currently, no prediction for the selected city!');
+				},
+			});
+		}
+	
+		function handlePageEvents () {
+			let selected = $('#method option:selected').attr('value');
+			if (selected == 'by_day') {
+				$('#day').parent().show();
+				$('#city').parent().hide();
+				$('#days').parent().hide();
+				fillTableByDay();
+			} else if (selected == 'by_city') {
+				$('#day').parent().hide();
+				$('#city').parent().show();
+				$('#days').parent().show();
+				fillTableByCity();
+			}
+		}
+	
+    	$(function () {
+    		handlePageEvents();
+    		$('select').change(handlePageEvents);
+    		window.angleClass = {
+    			'S': 'd-0',
+    			'SW': 'd-45',
+    			'W': 'd-90',
+    			'NW': 'd-135',
+    			'N': 'd-180',
+    			'NE': 'd-225',
+    			'E': 'd-270',
+    			'SE': 'd-315',
+    		};
+    	});
+    </script>
+</body>
+</html>
