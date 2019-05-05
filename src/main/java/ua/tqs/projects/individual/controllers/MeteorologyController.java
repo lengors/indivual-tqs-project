@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,12 +50,12 @@ public class MeteorologyController
 
 	@Autowired
 	private WindSpeedClassRepository windSpeedClassRepository;
-	
+
 	private TTLCache<String, Map<String, Object>> cache;
 	private Thread thread;
-	
+
 	// Constants
-	final String classWindSpeed = "classWindSpeed";
+	static final String classWindSpeed = "classWindSpeed";
 
 	@PostConstruct
 	public void init()
@@ -77,7 +76,7 @@ public class MeteorologyController
 	{
 		return cache;
 	}
-	
+
 	@GetMapping(value = "/cities")
 	public Map<String, Object> getCities()
 	{
@@ -104,11 +103,9 @@ public class MeteorologyController
 	@GetMapping(value = "/meteorology", params = "id")
 	public Map<String, Object> getById(@RequestParam int id)
 	{
-		return get(
-			String.format("meteorology?id=%d", id),
-			String.format("http://api.ipma.pt/open-data/forecast/meteorology/cities/daily/%d.json", id),
-			(Map<String, Object> result) -> fix(result, id)
-		);
+		return get(String.format("meteorology?id=%d", id),
+				String.format("http://api.ipma.pt/open-data/forecast/meteorology/cities/daily/%d.json", id),
+				(Map<String, Object> result) -> fix(result, id));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -170,9 +167,11 @@ public class MeteorologyController
 		Statistics statistics = statisticsRepository.findById(key).orElseGet(() -> new Statistics().setKey(key));
 		if ((result = cache.get(key)) == null)
 		{
-			cache.put(key, result = supplier.get());
+			result = supplier.get();
+			cache.put(key, result);
 			statistics.setMisses(statistics.getMisses() + 1);
-		} else
+		}
+		else
 			statistics.setHits(statistics.getHits() + 1);
 		statistics.setRequests(statistics.getRequests() + 1);
 		statisticsRepository.saveAndFlush(statistics);
@@ -182,52 +181,47 @@ public class MeteorologyController
 	@Autowired
 	@SuppressWarnings(
 	{
-			"unchecked", "rawtypes"
+			"unchecked"
 	})
 	private void updateRepository(PlatformTransactionManager transactionManager)
 	{
-		new TransactionTemplate(transactionManager).execute(new TransactionCallback()
+		new TransactionTemplate(transactionManager).execute((TransactionStatus status) ->
 		{
-			@Override
-			public Object doInTransaction(TransactionStatus status)
+			Map<String, Object> result = Requester.Get("http://api.ipma.pt/open-data/weather-type-classe.json",
+					Requester.AS_MAP);
+			List<Object> weatherTypes = (List<Object>) result.get("data");
+			for (Object weatherType : weatherTypes)
 			{
-				Map<String, Object> result = Requester.Get("http://api.ipma.pt/open-data/weather-type-classe.json",
-						Requester.AS_MAP);
-				List<Object> weatherTypes = (List<Object>) result.get("data");
-				for (Object weatherType : weatherTypes)
-				{
-					Map<String, Object> weatherTypeObject = (Map<String, Object>) weatherType;
-					Integer id = (Integer) weatherTypeObject.get("idWeatherType");
-					WeatherType weatherTypeInstance = weatherTypeRepository.findById(id)
-							.orElseGet(() -> new WeatherType());
-					Converter.FromMap(weatherTypeInstance, weatherTypeObject);
-					weatherTypeRepository.saveAndFlush(weatherTypeInstance);
-				}
-				result = Requester.Get("http://api.ipma.pt/open-data/wind-speed-daily-classe.json", Requester.AS_MAP);
-				List<Object> windSpeedClasses = (List<Object>) result.get("data");
-				for (Object windSpeedClass : windSpeedClasses)
-				{
-					Map<String, Object> windSpeedClassObject = (Map<String, Object>) windSpeedClass;
-					windSpeedClassObject.put(classWindSpeed,
-							Integer.parseInt((String) windSpeedClassObject.get(classWindSpeed)));
-					Integer id = (Integer) windSpeedClassObject.get(classWindSpeed);
-					WindSpeedClass windSpeedClassInstance = windSpeedClassRepository.findById(id)
-							.orElseGet(() -> new WindSpeedClass());
-					Converter.FromMap(windSpeedClassInstance, windSpeedClassObject);
-					windSpeedClassRepository.saveAndFlush(windSpeedClassInstance);
-				}
-				result = Requester.Get("http://api.ipma.pt/open-data/distrits-islands.json", Requester.AS_MAP);
-				List<Object> cities = (List<Object>) result.get("data");
-				for (Object city : cities)
-				{
-					Map<String, Object> cityObject = (Map<String, Object>) city;
-					Integer id = (Integer) cityObject.get("globalIdLocal");
-					City cityInstance = cityRepository.findById(id).orElseGet(() -> new City());
-					Converter.FromMap(cityInstance, cityObject);
-					cityRepository.saveAndFlush(cityInstance);
-				}
-				return null;
+				Map<String, Object> weatherTypeObject = (Map<String, Object>) weatherType;
+				Integer id = (Integer) weatherTypeObject.get("idWeatherType");
+				WeatherType weatherTypeInstance = weatherTypeRepository.findById(id).orElseGet(WeatherType::new);
+				Converter.FromMap(weatherTypeInstance, weatherTypeObject);
+				weatherTypeRepository.saveAndFlush(weatherTypeInstance);
 			}
+			result = Requester.Get("http://api.ipma.pt/open-data/wind-speed-daily-classe.json", Requester.AS_MAP);
+			List<Object> windSpeedClasses = (List<Object>) result.get("data");
+			for (Object windSpeedClass : windSpeedClasses)
+			{
+				Map<String, Object> windSpeedClassObject = (Map<String, Object>) windSpeedClass;
+				windSpeedClassObject.put(classWindSpeed,
+						Integer.parseInt((String) windSpeedClassObject.get(classWindSpeed)));
+				Integer id = (Integer) windSpeedClassObject.get(classWindSpeed);
+				WindSpeedClass windSpeedClassInstance = windSpeedClassRepository.findById(id)
+						.orElseGet(WindSpeedClass::new);
+				Converter.FromMap(windSpeedClassInstance, windSpeedClassObject);
+				windSpeedClassRepository.saveAndFlush(windSpeedClassInstance);
+			}
+			result = Requester.Get("http://api.ipma.pt/open-data/distrits-islands.json", Requester.AS_MAP);
+			List<Object> cities = (List<Object>) result.get("data");
+			for (Object city : cities)
+			{
+				Map<String, Object> cityObject = (Map<String, Object>) city;
+				Integer id = (Integer) cityObject.get("globalIdLocal");
+				City cityInstance = cityRepository.findById(id).orElseGet(City::new);
+				Converter.FromMap(cityInstance, cityObject);
+				cityRepository.saveAndFlush(cityInstance);
+			}
+			return null;
 		});
 	}
 }
