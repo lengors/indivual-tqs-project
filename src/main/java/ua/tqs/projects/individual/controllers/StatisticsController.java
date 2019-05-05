@@ -26,6 +26,11 @@ public class StatisticsController
 	static final String BY_DAY = "meteorology?day=%d";
 	static final String BY_ID_DAY = "meteorology?id=%d&days=%d";
 	
+	static final String HITS = "hits";
+	static final String RATIO = "ratio";
+	static final String MISSES = "misses";
+	static final String REQUESTS = "requests";
+	
 	@GetMapping(value = "/hits")
 	public Map<String, Object> getHits()
 	{
@@ -44,7 +49,7 @@ public class StatisticsController
 	public Map<String, Object> getHitsCities()
 	{
 		Map<String, Object> map = new HashMap<>();
-		map.put("hits", statisticsRepository.findById(CITIES).orElseGet(Statistics::new).getHits());
+		map.put(HITS, statisticsRepository.findById(CITIES).orElseGet(Statistics::new).getHits());
 		return map;
 	}
 	
@@ -52,7 +57,7 @@ public class StatisticsController
 	public Map<String, Object> getHitsById(@RequestParam int id)
 	{
 		Map<String, Object> map = new HashMap<>();
-		map.put("hits", statisticsRepository.findById(String.format(BY_ID, id)).orElseGet(Statistics::new).getHits());
+		map.put(HITS, statisticsRepository.findById(String.format(BY_ID, id)).orElseGet(Statistics::new).getHits());
 		return map;
 	}
 	
@@ -60,7 +65,7 @@ public class StatisticsController
 	public Map<String, Object> getHitsByDay(@RequestParam int day)
 	{
 		Map<String, Object> map = new HashMap<>();
-		map.put("hits", statisticsRepository.findById(String.format(BY_DAY, day)).orElseGet(Statistics::new).getHits());
+		map.put(HITS, statisticsRepository.findById(String.format(BY_DAY, day)).orElseGet(Statistics::new).getHits());
 		return map;
 	}
 	
@@ -68,7 +73,7 @@ public class StatisticsController
 	public Map<String, Object> getHitsByIdDay(@RequestParam int id, @RequestParam int days)
 	{
 		Map<String, Object> map = new HashMap<>();
-		map.put("hits", statisticsRepository.findById(String.format(BY_ID_DAY, id, days)).orElseGet(Statistics::new).getHits());
+		map.put(HITS, statisticsRepository.findById(String.format(BY_ID_DAY, id, days)).orElseGet(Statistics::new).getHits());
 		return map;
 	}
 	
@@ -90,7 +95,7 @@ public class StatisticsController
 	public Map<String, Object> getMissesCities()
 	{
 		Map<String, Object> map = new HashMap<>();
-		map.put("misses", statisticsRepository.findById(CITIES).orElseGet(Statistics::new).getMisses());
+		map.put(MISSES, statisticsRepository.findById(CITIES).orElseGet(Statistics::new).getMisses());
 		return map;
 	}
 	
@@ -98,7 +103,7 @@ public class StatisticsController
 	public Map<String, Object> getMissesById(@RequestParam int id)
 	{
 		Map<String, Object> map = new HashMap<>();
-		map.put("misses", statisticsRepository.findById(String.format(BY_ID, id)).orElseGet(Statistics::new).getMisses());
+		map.put(MISSES, statisticsRepository.findById(String.format(BY_ID, id)).orElseGet(Statistics::new).getMisses());
 		return map;
 	}
 	
@@ -106,7 +111,7 @@ public class StatisticsController
 	public Map<String, Object> getMissesByDay(@RequestParam int day)
 	{
 		Map<String, Object> map = new HashMap<>();
-		map.put("misses", statisticsRepository.findById(String.format(BY_DAY, day)).orElseGet(Statistics::new).getMisses());
+		map.put(MISSES, statisticsRepository.findById(String.format(BY_DAY, day)).orElseGet(Statistics::new).getMisses());
 		return map;
 	}
 
@@ -114,7 +119,7 @@ public class StatisticsController
 	public Map<String, Object> getMissesByIdDay(@RequestParam int id, @RequestParam int days)
 	{
 		Map<String, Object> map = new HashMap<>();
-		map.put("misses", statisticsRepository.findById(String.format(BY_ID_DAY, id, days)).orElseGet(Statistics::new).getMisses());
+		map.put(MISSES, statisticsRepository.findById(String.format(BY_ID_DAY, id, days)).orElseGet(Statistics::new).getMisses());
 		return map;
 	}
 
@@ -136,7 +141,7 @@ public class StatisticsController
 	public Map<String, Object> getRequestsCities()
 	{
 		Map<String, Object> map = new HashMap<>();
-		map.put("requests", statisticsRepository.findById(CITIES).orElseGet(Statistics::new).getRequests());
+		map.put(REQUESTS, statisticsRepository.findById(CITIES).orElseGet(Statistics::new).getRequests());
 		return map;
 	}
 
@@ -144,7 +149,7 @@ public class StatisticsController
 	public Map<String, Object> getRequestsById(@RequestParam int id)
 	{
 		Map<String, Object> map = new HashMap<>();
-		map.put("requests", statisticsRepository.findById(String.format(BY_ID, id)).orElseGet(Statistics::new).getRequests());
+		map.put(REQUESTS, statisticsRepository.findById(String.format(BY_ID, id)).orElseGet(Statistics::new).getRequests());
 		return map;
 	}
 
@@ -152,7 +157,7 @@ public class StatisticsController
 	public Map<String, Object> getRequestsByDay(@RequestParam int day)
 	{
 		Map<String, Object> map = new HashMap<>();
-		map.put("requests", statisticsRepository.findById(String.format(BY_DAY, day)).orElseGet(Statistics::new).getRequests());
+		map.put(REQUESTS, statisticsRepository.findById(String.format(BY_DAY, day)).orElseGet(Statistics::new).getRequests());
 		return map;
 	}
 
@@ -160,7 +165,7 @@ public class StatisticsController
 	public Map<String, Object> getRequestsByIdDay(@RequestParam int id, @RequestParam int days)
 	{
 		Map<String, Object> map = new HashMap<>();
-		map.put("requests", statisticsRepository.findById(String.format(BY_ID_DAY, id, days)).orElseGet(Statistics::new).getRequests());
+		map.put(REQUESTS, statisticsRepository.findById(String.format(BY_ID_DAY, id, days)).orElseGet(Statistics::new).getRequests());
 		return map;
 	}
 
@@ -168,8 +173,8 @@ public class StatisticsController
 	public Map<String, Object> getRatio()
 	{
 		List<Statistics> statistics = statisticsRepository.findAll();
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("ratio", statistics.stream().collect(Collectors.summingInt(x -> x.getHits())).doubleValue() / statistics.stream().collect(Collectors.summingInt(Statistics::getMisses)).doubleValue());
+		Map<String, Object> map = new HashMap<>();
+		map.put(RATIO, statistics.stream().collect(Collectors.summingInt(x -> x.getHits())).doubleValue() / statistics.stream().collect(Collectors.summingInt(Statistics::getMisses)).doubleValue());
 		return map;
 	}
 
@@ -177,8 +182,8 @@ public class StatisticsController
 	public Map<String, Object> getRatioCities()
 	{
 		Statistics statistics = statisticsRepository.findById(CITIES).orElseGet(Statistics::new);
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("ratio", (double) statistics.getHits() / statistics.getMisses());
+		Map<String, Object> map = new HashMap<>();
+		map.put(RATIO, (double) statistics.getHits() / statistics.getMisses());
 		return map;
 	}
 
@@ -186,8 +191,8 @@ public class StatisticsController
 	public Map<String, Object> getRatioById(@RequestParam int id)
 	{
 		Statistics statistics = statisticsRepository.findById(String.format(BY_ID, id)).orElseGet(Statistics::new);
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("ratio", (double) statistics.getHits() / statistics.getMisses());
+		Map<String, Object> map = new HashMap<>();
+		map.put(RATIO, (double) statistics.getHits() / statistics.getMisses());
 		return map;
 	}
 
@@ -195,8 +200,8 @@ public class StatisticsController
 	public Map<String, Object> getRatioByDay(@RequestParam int day)
 	{
 		Statistics statistics = statisticsRepository.findById(String.format(BY_DAY, day)).orElseGet(Statistics::new);
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("ratio", (double) statistics.getHits() / statistics.getMisses());
+		Map<String, Object> map = new HashMap<>();
+		map.put(RATIO, (double) statistics.getHits() / statistics.getMisses());
 		return map;
 	}
 
@@ -204,8 +209,8 @@ public class StatisticsController
 	public Map<String, Object> getRatioByIdDay(@RequestParam int id, @RequestParam int days)
 	{
 		Statistics statistics = statisticsRepository.findById(String.format(BY_ID_DAY, id, days)).orElseGet(Statistics::new);
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("ratio", (double) statistics.getHits() / statistics.getMisses());
+		Map<String, Object> map = new HashMap<>();
+		map.put(RATIO, (double) statistics.getHits() / statistics.getMisses());
 		return map;
 	}
 }
