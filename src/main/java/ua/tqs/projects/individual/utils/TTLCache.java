@@ -52,6 +52,12 @@ public class TTLCache<K, V> implements ICache<K, V>, Runnable
 	}
 
 	@Override
+	public void clear()
+	{
+		cache.clear();
+	}
+	
+	@Override
 	public synchronized V get(K key)
 	{
 		checkTTL(key);
@@ -93,6 +99,7 @@ public class TTLCache<K, V> implements ICache<K, V>, Runnable
 			}
 			catch (InterruptedException e)
 			{
+				Thread.currentThread().interrupt();
 			}
 		}
 	}

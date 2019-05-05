@@ -23,6 +23,13 @@ public class Cache<K, V> implements ICache<K, V>
 	}
 	
 	@Override
+	public void clear()
+	{
+		map.clear();
+		start = end = null;
+	}
+	
+	@Override
 	public V get(K key)
 	{
 		Node<Pair<K, V>> node = map.get(key);

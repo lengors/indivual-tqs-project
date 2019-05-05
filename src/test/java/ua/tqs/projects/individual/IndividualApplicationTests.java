@@ -7,20 +7,22 @@ import org.hamcrest.Matchers;
 import org.json.JSONObject;
 
 import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+
 import org.springframework.http.MediaType;
+
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import ua.tqs.projects.individual.utils.TTLCache;
+import ua.tqs.projects.individual.controllers.MeteorologyController;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -30,17 +32,14 @@ public class IndividualApplicationTests
 	@Autowired
 	private MockMvc mvc;
 
+	@Autowired
+	private MeteorologyController meteorologyController;
+	
 	@Test
 	public void allTest() throws Exception
 	{
 		// Ensures that the cache is empty before any test
-		long current = System.nanoTime(), target = System.nanoTime() + TTLCache.DEFAULT_TTL;
-		long amount = target - current;
-		while (amount > 0)
-		{
-			Thread.sleep(amount / (long) 1e6);
-			amount = target - System.nanoTime();
-		}
+		meteorologyController.getCache().clear();
 
 		int hits = getStatistic("hits", "cities");
 		int misses = getStatistic("misses", "cities");

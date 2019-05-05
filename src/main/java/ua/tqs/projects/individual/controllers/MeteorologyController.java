@@ -64,18 +64,17 @@ public class MeteorologyController
 	}
 
 	@PreDestroy
-	public void destroy()
+	public void destroy() throws InterruptedException
 	{
 		thread.interrupt();
-		try
-		{
-			thread.join();
-		} catch (InterruptedException e)
-		{
-			throw new RuntimeException(e);
-		}
+		thread.join();
 	}
 
+	public TTLCache<String, Map<String, Object>> getCache()
+	{
+		return cache;
+	}
+	
 	@SuppressWarnings("serial")
 	@GetMapping(value = "/cities")
 	public Map<String, Object> getCities()
