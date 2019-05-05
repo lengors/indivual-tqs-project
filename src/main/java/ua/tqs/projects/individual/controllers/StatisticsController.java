@@ -22,36 +22,34 @@ public class StatisticsController
 	private StatisticsRepository statisticsRepository;
 
 	@GetMapping(value = "/hits")
-	public Map<String, Object> GetHits()
+	public Map<String, Object> getHits()
 	{
-		return statisticsRepository.findAll().stream().collect(Collectors.toMap(x -> x.getKey(), x -> x.getHits()));
+		return statisticsRepository.findAll().stream().collect(Collectors.toMap(Statistics::getKey, Statistics::getHits));
 	}
 	
 	@SuppressWarnings("serial")
 	@GetMapping(value = "/hits/sum")
-	public Map<String, Object> GetHitsSum()
+	public Map<String, Object> getHitsSum()
 	{
 		return new HashMap<String, Object>() {{
-			put("sum", statisticsRepository.findAll().stream().collect(Collectors.summingInt(x -> x.getHits())));
+			put("sum", statisticsRepository.findAll().stream().collect(Collectors.summingInt(Statistics::getHits)));
 		}};
 	}
 	
-	@SuppressWarnings("serial")
 	@GetMapping(value = "/hits/cities")
-	public Map<String, Object> GetHitsCities()
+	public Map<String, Object> getHitsCities()
 	{
-		return new HashMap<String, Object>() {{
-			put("hits", statisticsRepository.findById("cities").orElseGet(() -> new Statistics()).getHits());
-		}};
+		Map<String, Object> map = new HashMap<>();
+		map.put("hits", statisticsRepository.findById("cities").orElseGet(() -> new Statistics()).getHits());
+		return map;
 	}
 	
-	@SuppressWarnings("serial")
 	@GetMapping(value = "/hits/meteorology", params = "id")
-	public Map<String, Object> GetHitsById(@RequestParam int id)
+	public Map<String, Object> getHitsById(@RequestParam int id)
 	{
-		return new HashMap<String, Object>() {{
-			put("hits", statisticsRepository.findById(String.format("meteorology?id=%d", id)).orElseGet(() -> new Statistics()).getHits());
-		}};
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("hits", statisticsRepository.findById(String.format("meteorology?id=%d", id)).orElseGet(() -> new Statistics()).getHits());
+		return map;
 	}
 	
 	@SuppressWarnings("serial")
