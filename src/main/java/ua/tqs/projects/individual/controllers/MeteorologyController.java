@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import javax.annotation.PreDestroy;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,15 +56,15 @@ public class MeteorologyController
 	private Thread thread;
 
 	@PostConstruct
-	public void Init()
+	public void init()
 	{
 		cache = new TTLCache<>();
 		thread = new Thread(cache);
 		thread.start();
 	}
 
-	@Override
-	public void finalize()
+	@PreDestroy
+	public void destroy()
 	{
 		thread.interrupt();
 		try
@@ -77,9 +78,9 @@ public class MeteorologyController
 
 	@SuppressWarnings("serial")
 	@GetMapping(value = "/cities")
-	public Map<String, Object> GetCities()
+	public Map<String, Object> getCities()
 	{
-		Map<String, Object> result = Get("cities", () ->
+		Map<String, Object> result = get("cities", () ->
 		{
 			List<Object> list = new ArrayList<>();
 			cityRepository.findAll().forEach(city -> list.add(Converter.ToMap(city)));
@@ -94,23 +95,23 @@ public class MeteorologyController
 	}
 
 	@GetMapping(value = "/meteorology", params = "day")
-	public Map<String, Object> GetByDay(@RequestParam int day)
+	public Map<String, Object> getByDay(@RequestParam int day)
 	{
-		return Get(String.format("meteorology?day=%d", day),
+		return get(String.format("meteorology?day=%d", day),
 				String.format(
 						"http://api.ipma.pt/open-data/forecast/meteorology/cities/daily/hp-daily-forecast-day%d.json",
 						day),
-				this::Fix);
+				this::fix);
 	}
 
 	@GetMapping(value = "/meteorology", params = "id")
-	public Map<String, Object> GetById(@RequestParam int id)
+	public Map<String, Object> getById(@RequestParam int id)
 	{
-		return Get(String.format("meteorology?id=%d", id),
+		return get(String.format("meteorology?id=%d", id),
 				String.format("http://api.ipma.pt/open-data/forecast/meteorology/cities/daily/%d.json", id),
 				(Map<String, Object> result) ->
 				{
-					Fix(result, id);
+					fix(result, id);
 				});
 	}
 
@@ -119,20 +120,20 @@ public class MeteorologyController
 	{
 			"id", "days"
 	})
-	public Map<String, Object> GetByIdDay(@RequestParam int id, @RequestParam int days)
+	public Map<String, Object> getByIdDay(@RequestParam int id, @RequestParam int days)
 	{
-		return Get(String.format("meteorology?id=%d&days=%d", id, days),
+		return get(String.format("meteorology?id=%d&days=%d", id, days),
 				String.format("http://api.ipma.pt/open-data/forecast/meteorology/cities/daily/%d.json", id),
 				(Map<String, Object> result) ->
 				{
 					result.put("data",
 							((List<Object>) result.get("data")).subList(0, days >= 1 && days <= 5 ? days : 5));
-					Fix(result, id);
+					fix(result, id);
 				});
 	}
 
 	@SuppressWarnings("unchecked")
-	private Map<String, Object> Fix(Map<String, Object> result, Object... args)
+	private Map<String, Object> fix(Map<String, Object> result, Object... args)
 	{
 		((List<Map<String, Object>>) result.get("data")).forEach((Map<String, Object> instance) ->
 		{
@@ -149,7 +150,7 @@ public class MeteorologyController
 		return result;
 	}
 
-	private Map<String, Object> Get(String key, String url, Consumer<Map<String, Object>> consumer)
+	private Map<String, Object> get(String key, String url, Consumer<Map<String, Object>> consumer)
 	{
 		Map<String, Object> result;
 		Statistics statistics = statisticsRepository.findById(key).orElseGet(() -> new Statistics().setKey(key));
@@ -165,7 +166,7 @@ public class MeteorologyController
 		return result;
 	}
 
-	private Map<String, Object> Get(String key, Supplier<Map<String, Object>> supplier)
+	private Map<String, Object> get(String key, Supplier<Map<String, Object>> supplier)
 	{
 		Map<String, Object> result;
 		Statistics statistics = statisticsRepository.findById(key).orElseGet(() -> new Statistics().setKey(key));
@@ -185,7 +186,7 @@ public class MeteorologyController
 	{
 			"unchecked", "rawtypes"
 	})
-	private void UpdateRepository(PlatformTransactionManager transactionManager)
+	private void updateRepository(PlatformTransactionManager transactionManager)
 	{
 		new TransactionTemplate(transactionManager).execute(new TransactionCallback()
 		{

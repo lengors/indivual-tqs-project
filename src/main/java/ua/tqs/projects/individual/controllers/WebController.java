@@ -16,7 +16,7 @@ public class WebController
 	@GetMapping(value = "/")
 	public String Index(Model model)
 	{
-		model.addAttribute("places", meteorologyController.GetCities().get("data"));
+		model.addAttribute("places", meteorologyController.getCities().get("data"));
 		return "index";
 	}
 }
