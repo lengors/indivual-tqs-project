@@ -55,7 +55,7 @@ public class MeteorologyController
 	private Thread thread;
 
 	// Constants
-	static final String ClassWindSpeed = "classWindSpeed";
+	static final String Class_Wind_Speed = "Class_Wind_Speed";
 
 	@PostConstruct
 	public void init()
@@ -132,8 +132,8 @@ public class MeteorologyController
 		{
 			instance.put("weatherType", Converter.ToMap(
 					weatherTypeRepository.getOne((Integer) instance.get("idWeatherType")), "hibernateLazyInitializer"));
-			instance.put(ClassWindSpeed,
-					Converter.ToMap(windSpeedClassRepository.getOne((Integer) instance.get(ClassWindSpeed)),
+			instance.put(Class_Wind_Speed,
+					Converter.ToMap(windSpeedClassRepository.getOne((Integer) instance.get(Class_Wind_Speed)),
 							"hibernateLazyInitializer"));
 			Optional<City> city = cityRepository
 					.findById(args.length == 0 ? (Integer) instance.get("globalIdLocal") : (Integer) args[0]);
@@ -203,9 +203,9 @@ public class MeteorologyController
 			for (Object windSpeedClass : windSpeedClasses)
 			{
 				Map<String, Object> windSpeedClassObject = (Map<String, Object>) windSpeedClass;
-				windSpeedClassObject.put(ClassWindSpeed,
-						Integer.parseInt((String) windSpeedClassObject.get(ClassWindSpeed)));
-				Integer id = (Integer) windSpeedClassObject.get(ClassWindSpeed);
+				windSpeedClassObject.put(Class_Wind_Speed,
+						Integer.parseInt((String) windSpeedClassObject.get(Class_Wind_Speed)));
+				Integer id = (Integer) windSpeedClassObject.get(Class_Wind_Speed);
 				WindSpeedClass windSpeedClassInstance = windSpeedClassRepository.findById(id)
 						.orElseGet(WindSpeedClass::new);
 				Converter.FromMap(windSpeedClassInstance, windSpeedClassObject);
