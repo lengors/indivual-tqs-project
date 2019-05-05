@@ -82,7 +82,7 @@ public class MeteorologyController
 		{
 			List<Object> list = new ArrayList<>();
 			cityRepository.findAll().forEach(city -> list.add(Converter.ToMap(city)));
-			Map<String, Object> map = new HashMap<String, Object>();
+			Map<String, Object> map = new HashMap<>();
 			map.put("data", list);
 			return map;
 		});
