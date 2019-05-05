@@ -54,6 +54,9 @@ public class MeteorologyController
 	
 	private TTLCache<String, Map<String, Object>> cache;
 	private Thread thread;
+	
+	// Constants
+	final String classWindSpeed = "classWindSpeed";
 
 	@PostConstruct
 	public void init()
@@ -101,12 +104,11 @@ public class MeteorologyController
 	@GetMapping(value = "/meteorology", params = "id")
 	public Map<String, Object> getById(@RequestParam int id)
 	{
-		return get(String.format("meteorology?id=%d", id),
-				String.format("http://api.ipma.pt/open-data/forecast/meteorology/cities/daily/%d.json", id),
-				(Map<String, Object> result) ->
-				{
-					fix(result, id);
-				});
+		return get(
+			String.format("meteorology?id=%d", id),
+			String.format("http://api.ipma.pt/open-data/forecast/meteorology/cities/daily/%d.json", id),
+			(Map<String, Object> result) -> fix(result, id)
+		);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -133,8 +135,8 @@ public class MeteorologyController
 		{
 			instance.put("weatherType", Converter.ToMap(
 					weatherTypeRepository.getOne((Integer) instance.get("idWeatherType")), "hibernateLazyInitializer"));
-			instance.put("classWindSpeed",
-					Converter.ToMap(windSpeedClassRepository.getOne((Integer) instance.get("classWindSpeed")),
+			instance.put(classWindSpeed,
+					Converter.ToMap(windSpeedClassRepository.getOne((Integer) instance.get(classWindSpeed)),
 							"hibernateLazyInitializer"));
 			Optional<City> city = cityRepository
 					.findById(args.length == 0 ? (Integer) instance.get("globalIdLocal") : (Integer) args[0]);
@@ -150,10 +152,12 @@ public class MeteorologyController
 		Statistics statistics = statisticsRepository.findById(key).orElseGet(() -> new Statistics().setKey(key));
 		if ((result = cache.get(key)) == null)
 		{
-			cache.put(key, result = Requester.Get(url, Requester.AS_MAP));
+			result = Requester.Get(url, Requester.AS_MAP);
+			cache.put(key, result);
 			statistics.setMisses(statistics.getMisses() + 1);
 			consumer.accept(result);
-		} else
+		}
+		else
 			statistics.setHits(statistics.getHits() + 1);
 		statistics.setRequests(statistics.getRequests() + 1);
 		statisticsRepository.saveAndFlush(statistics);
@@ -204,9 +208,9 @@ public class MeteorologyController
 				for (Object windSpeedClass : windSpeedClasses)
 				{
 					Map<String, Object> windSpeedClassObject = (Map<String, Object>) windSpeedClass;
-					windSpeedClassObject.put("classWindSpeed",
-							Integer.parseInt((String) windSpeedClassObject.get("classWindSpeed")));
-					Integer id = (Integer) windSpeedClassObject.get("classWindSpeed");
+					windSpeedClassObject.put(classWindSpeed,
+							Integer.parseInt((String) windSpeedClassObject.get(classWindSpeed)));
+					Integer id = (Integer) windSpeedClassObject.get(classWindSpeed);
 					WindSpeedClass windSpeedClassInstance = windSpeedClassRepository.findById(id)
 							.orElseGet(() -> new WindSpeedClass());
 					Converter.FromMap(windSpeedClassInstance, windSpeedClassObject);
