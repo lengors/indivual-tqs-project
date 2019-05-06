@@ -54,7 +54,7 @@ public class MeteorologyController
 	private Thread thread;
 
 	// Constants
-	static final String CLASS_WIND_SPEED = "CLASS_WIND_SPEED";
+	static final String CLASS_WIND_SPEED = "classWindSpeed";
 
 	@PostConstruct
 	public void init()

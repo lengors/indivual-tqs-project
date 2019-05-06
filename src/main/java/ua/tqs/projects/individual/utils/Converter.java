@@ -23,11 +23,11 @@ public class Converter
 			if (!exceptions.contains(entry.getKey()))
 				try
 				{
-					if (!set(getDeclaredField(clazz, entry.getKey()), entry.getValue()))
+					if (!set(getDeclaredField(clazz, entry.getKey()), object, entry.getValue()))
 						set(getDeclaredMethod(clazz,
 								String.format("set%s",
 										entry.getKey().substring(0, 1).toUpperCase() + entry.getKey().substring(1)),
-								entry.getValue().getClass()), entry.getValue());
+								entry.getValue().getClass()), object, entry.getValue());
 				} catch (IllegalAccessException | InvocationTargetException e)
 				{
 					throw new RethrowException(e);
@@ -87,21 +87,21 @@ public class Converter
 		}
 	}
 
-	private static boolean set(Field field, Object object) throws IllegalAccessException
+	private static boolean set(Field field, Object self, Object argument) throws IllegalAccessException
 	{
 		if (field != null && Modifier.isPublic(field.getModifiers()))
 		{
-			field.set(object, object);
+			field.set(self, argument);
 			return true;
 		}
 		return false;
 	}
 
-	private static boolean set(Method method, Object object) throws IllegalAccessException, InvocationTargetException
+	private static boolean set(Method method, Object self, Object argument) throws IllegalAccessException, InvocationTargetException
 	{
 		if (method != null && Modifier.isPublic(method.getModifiers()))
 		{
-			method.invoke(object, object);
+			method.invoke(self, argument);
 			return true;
 		}
 		return false;

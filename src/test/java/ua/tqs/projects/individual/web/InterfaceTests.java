@@ -3,6 +3,7 @@ package ua.tqs.projects.individual.web;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -62,6 +63,7 @@ public class InterfaceTests
 		driver.findElement(By.id("city")).click();
 		new Select(driver.findElement(By.id("city"))).selectByVisibleText("Braga");
 		driver.findElement(By.id("city")).click();
+		Assertions.assertEquals(3, driver.findElements(By.className("weekly-column")).size());
 	}
 
 	@After
