@@ -91,7 +91,7 @@ public class MeteorologyController
 					list.add(Converter.toMap(city));
 				} catch (IllegalAccessException | InvocationTargetException e)
 				{
-					e.printStackTrace();
+					throw new RethrowException(e);
 				}
 			});
 			Map<String, Object> map = new HashMap<>();
@@ -170,7 +170,8 @@ public class MeteorologyController
 			cache.put(key, result);
 			statistics.setMisses(statistics.getMisses() + 1);
 			consumer.accept(result);
-		} else
+		}
+		else
 			statistics.setHits(statistics.getHits() + 1);
 		statistics.setRequests(statistics.getRequests() + 1);
 		statisticsRepository.saveAndFlush(statistics);
@@ -186,7 +187,8 @@ public class MeteorologyController
 			result = supplier.get();
 			cache.put(key, result);
 			statistics.setMisses(statistics.getMisses() + 1);
-		} else
+		}
+		else
 			statistics.setHits(statistics.getHits() + 1);
 		statistics.setRequests(statistics.getRequests() + 1);
 		statisticsRepository.saveAndFlush(statistics);
@@ -215,7 +217,7 @@ public class MeteorologyController
 					Converter.fromMap(weatherTypeInstance, weatherTypeObject);
 				} catch (IllegalAccessException | InvocationTargetException e)
 				{
-					e.printStackTrace();
+					throw new RethrowException(e);
 				}
 				weatherTypeRepository.saveAndFlush(weatherTypeInstance);
 			}
@@ -234,7 +236,7 @@ public class MeteorologyController
 					Converter.fromMap(windSpeedClassInstance, windSpeedClassObject);
 				} catch (IllegalAccessException | InvocationTargetException e)
 				{
-					e.printStackTrace();
+					throw new RethrowException(e);
 				}
 				windSpeedClassRepository.saveAndFlush(windSpeedClassInstance);
 			}
@@ -250,7 +252,7 @@ public class MeteorologyController
 					Converter.fromMap(cityInstance, cityObject);
 				} catch (IllegalAccessException | InvocationTargetException e)
 				{
-					e.printStackTrace();
+					throw new RethrowException(e);
 				}
 				cityRepository.saveAndFlush(cityInstance);
 			}
