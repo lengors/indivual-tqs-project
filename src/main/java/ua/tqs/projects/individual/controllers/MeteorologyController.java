@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ua.tqs.projects.individual.utils.TTLCache;
 import ua.tqs.projects.individual.utils.Converter;
 import ua.tqs.projects.individual.utils.Requester;
-
+import ua.tqs.projects.individual.utils.RethrowException;
 import ua.tqs.projects.individual.entities.City;
 import ua.tqs.projects.individual.entities.Statistics;
 import ua.tqs.projects.individual.entities.WeatherType;
@@ -154,7 +154,7 @@ public class MeteorologyController
 					instance.put("city", Converter.toMap(city.get()));
 			} catch (IllegalAccessException | InvocationTargetException e)
 			{
-				throw new RuntimeException(e);
+				throw new RethrowException(e);
 			}
 		});
 		return result;
