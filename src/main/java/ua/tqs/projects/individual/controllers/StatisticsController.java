@@ -40,9 +40,10 @@ public class StatisticsController
 	@GetMapping(value = "/hits/sum")
 	public Map<String, Object> getHitsSum()
 	{
-		Map<String, Object> map = new HashMap<>();
-		map.put("sum", statisticsRepository.findAll().stream().collect(Collectors.summingInt(Statistics::getHits)));
-		return map;
+		return new HashMap<String, Object>()
+		{{
+			put("sum", statisticsRepository.findAll().stream().collect(Collectors.summingInt(Statistics::getHits)));
+		}};
 	}
 	
 	@GetMapping(value = "/hits/cities")
