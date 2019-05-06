@@ -4,29 +4,28 @@ import java.util.List;
 
 public class TTLCache<K, V> implements ICache<K, V>, Runnable
 {
-	public static final long SECOND = SECOND(1);
-	public static final long MINUTE = MINUTE(1);
-	public static final long HOUR = HOUR(1);
-	public static final long DAY = DAY(1);
-
-	public static long DEFAULT_TTL = SECOND(5);
+	public static long DEFAULT_TTL = second(5);
+	public static final long SECOND = second(1);
+	public static final long MINUTE = minute(1);
+	public static final long HOUR = hour(1);
+	public static final long DAY = day(1);
 	
-	public static long DAY(long day)
+	public static long day(long day)
 	{
-		return HOUR(24 * day);
+		return hour(24 * day);
 	}
 	
-	public static long HOUR(long hour)
+	public static long hour(long hour)
 	{
-		return MINUTE(60 * hour);
+		return minute(60 * hour);
 	}
 	
-	public static long MINUTE(long minute)
+	public static long minute(long minute)
 	{
-		return SECOND(60 * minute);
+		return second(60 * minute);
 	}
 	
-	public static long SECOND(long second)
+	public static long second(long second)
 	{
 		return second * (long) 1e9;
 	}

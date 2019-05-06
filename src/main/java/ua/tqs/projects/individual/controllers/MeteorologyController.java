@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Optional;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 import java.util.function.Consumer;
@@ -25,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ua.tqs.projects.individual.utils.TTLCache;
 import ua.tqs.projects.individual.utils.Converter;
 import ua.tqs.projects.individual.utils.Requester;
-import ua.tqs.projects.individual.utils.RethrowException;
+
 import ua.tqs.projects.individual.entities.City;
 import ua.tqs.projects.individual.entities.Statistics;
 import ua.tqs.projects.individual.entities.WeatherType;
