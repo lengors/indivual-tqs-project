@@ -32,9 +32,9 @@ public class ConverterTests
 	}
 	
 	@Test
-	public void toMapTest()
+	public void toMapTest() throws IllegalAccessException, InvocationTargetException
 	{
-		Map<String, Object> result = Converter.ToMap(point);
+		Map<String, Object> result = Converter.toMap(point);
 		Assertions.assertTrue(result.containsKey("x"));
 		Assertions.assertTrue(result.containsKey("y"));
 		Assertions.assertEquals(point.x, result.get("x"));

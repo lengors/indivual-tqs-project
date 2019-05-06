@@ -84,7 +84,16 @@ public class MeteorologyController
 		return get("cities", () ->
 		{
 			List<Object> list = new ArrayList<>();
-			cityRepository.findAll().forEach(city -> list.add(Converter.ToMap(city)));
+			cityRepository.findAll().forEach(city ->
+			{
+				try
+				{
+					list.add(Converter.toMap(city));
+				} catch (IllegalAccessException | InvocationTargetException e)
+				{
+					e.printStackTrace();
+				}
+			});
 			Map<String, Object> map = new HashMap<>();
 			map.put("data", list);
 			return map;
@@ -131,15 +140,22 @@ public class MeteorologyController
 	{
 		((List<Map<String, Object>>) result.get("data")).forEach((Map<String, Object> instance) ->
 		{
-			instance.put("weatherType", Converter.ToMap(
-					weatherTypeRepository.getOne((Integer) instance.get("idWeatherType")), "hibernateLazyInitializer"));
-			instance.put(CLASS_WIND_SPEED,
-					Converter.ToMap(windSpeedClassRepository.getOne((Integer) instance.get(CLASS_WIND_SPEED)),
-							"hibernateLazyInitializer"));
-			Optional<City> city = cityRepository
-					.findById(args.length == 0 ? (Integer) instance.get("globalIdLocal") : (Integer) args[0]);
-			if (city.isPresent())
-				instance.put("city", Converter.ToMap(city.get()));
+			try
+			{
+				instance.put("weatherType",
+						Converter.toMap(weatherTypeRepository.getOne((Integer) instance.get("idWeatherType")),
+								"hibernateLazyInitializer"));
+				instance.put(CLASS_WIND_SPEED,
+						Converter.toMap(windSpeedClassRepository.getOne((Integer) instance.get(CLASS_WIND_SPEED)),
+								"hibernateLazyInitializer"));
+				Optional<City> city = cityRepository
+						.findById(args.length == 0 ? (Integer) instance.get("globalIdLocal") : (Integer) args[0]);
+				if (city.isPresent())
+					instance.put("city", Converter.toMap(city.get()));
+			} catch (IllegalAccessException | InvocationTargetException e)
+			{
+				throw new RuntimeException(e);
+			}
 		});
 		return result;
 	}
@@ -154,8 +170,7 @@ public class MeteorologyController
 			cache.put(key, result);
 			statistics.setMisses(statistics.getMisses() + 1);
 			consumer.accept(result);
-		}
-		else
+		} else
 			statistics.setHits(statistics.getHits() + 1);
 		statistics.setRequests(statistics.getRequests() + 1);
 		statisticsRepository.saveAndFlush(statistics);
@@ -171,8 +186,7 @@ public class MeteorologyController
 			result = supplier.get();
 			cache.put(key, result);
 			statistics.setMisses(statistics.getMisses() + 1);
-		}
-		else
+		} else
 			statistics.setHits(statistics.getHits() + 1);
 		statistics.setRequests(statistics.getRequests() + 1);
 		statisticsRepository.saveAndFlush(statistics);

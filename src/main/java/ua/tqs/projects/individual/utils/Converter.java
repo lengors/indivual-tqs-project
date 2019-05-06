@@ -39,21 +39,15 @@ public class Converter
 		return object;
 	}
 
-	public static Map<String, Object> ToMap(Object object, String... except)
+	public static Map<String, Object> toMap(Object object, String... except) throws IllegalAccessException, InvocationTargetException
 	{
 		Class<?> clazz = object.getClass();
 		Map<String, Object> map = new HashMap<>();
 		List<String> exceptions = Arrays.asList(except);
 		for (Field field : clazz.getDeclaredFields())
-			try
-			{
-				if (!Modifier.isStatic(field.getModifiers()) && Modifier.isPublic(field.getModifiers())
-						&& !exceptions.contains(field.getName()))
-					map.put(field.getName(), field.get(object));
-			} catch (IllegalArgumentException | IllegalAccessException e)
-			{
-				throw new RuntimeException(e);
-			}
+			if (!Modifier.isStatic(field.getModifiers()) && Modifier.isPublic(field.getModifiers())
+					&& !exceptions.contains(field.getName()))
+				map.put(field.getName(), field.get(object));
 		for (Method method : clazz.getDeclaredMethods())
 		{
 			String name = method.getName();
@@ -63,13 +57,7 @@ public class Converter
 				name = name.substring(3);
 				name = name.substring(0, 1).toLowerCase() + name.substring(1);
 				if (!exceptions.contains(name) && !map.containsKey(name))
-					try
-					{
-						map.put(name, method.invoke(object));
-					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
-					{
-						throw new RuntimeException(e);
-					}
+					map.put(name, method.invoke(object));
 			}
 		}
 		return map;
