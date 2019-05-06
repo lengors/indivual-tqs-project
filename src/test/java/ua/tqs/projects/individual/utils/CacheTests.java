@@ -24,13 +24,13 @@ public class CacheTests
 	private City a, b, c;
 	
 	@Before
-	public void Setup()
+	public void setup()
 	{
 		cache = new Cache<>(2);
 	}
 	
 	@Test
-	public void Test()
+	public void test()
 	{
 		cache.put("a", a);
 		cache.put("b", b);

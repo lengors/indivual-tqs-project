@@ -4,28 +4,28 @@ import java.util.List;
 
 public class TTLCache<K, V> implements ICache<K, V>, Runnable
 {
-	public static long DEFAULT_TTL = second(5);
-	public static final long SECOND = second(1);
-	public static final long MINUTE = minute(1);
-	public static final long HOUR = hour(1);
-	public static final long DAY = day(1);
+	public static final long DEFAULT_TTL = secondInNanos(5);
+	public static final long SECOND = secondInNanos(1);
+	public static final long MINUTE = minuteInNanos(1);
+	public static final long HOUR = hourInNanos(1);
+	public static final long DAY = dayInNanos(1);
 	
-	public static long day(long day)
+	public static long dayInNanos(long day)
 	{
-		return hour(24 * day);
+		return hourInNanos(24 * day);
 	}
 	
-	public static long hour(long hour)
+	public static long hourInNanos(long hour)
 	{
-		return minute(60 * hour);
+		return minuteInNanos(60 * hour);
 	}
 	
-	public static long minute(long minute)
+	public static long minuteInNanos(long minute)
 	{
-		return second(60 * minute);
+		return secondInNanos(60 * minute);
 	}
 	
-	public static long second(long second)
+	public static long secondInNanos(long second)
 	{
 		return second * (long) 1e9;
 	}
@@ -67,6 +67,7 @@ public class TTLCache<K, V> implements ICache<K, V>, Runnable
 	@Override
 	public synchronized List<K> keys()
 	{
+		checkTTL();
 		return cache.keys();
 	}
 	
@@ -89,8 +90,7 @@ public class TTLCache<K, V> implements ICache<K, V>, Runnable
 		{
 			synchronized (this)
 			{
-				for (K key : cache.keys())
-					checkTTL(key);
+				checkTTL();
 			}
 			try
 			{
@@ -106,6 +106,7 @@ public class TTLCache<K, V> implements ICache<K, V>, Runnable
 	@Override
 	public synchronized int size()
 	{
+		checkTTL();
 		return cache.size();
 	}
 	
@@ -114,5 +115,11 @@ public class TTLCache<K, V> implements ICache<K, V>, Runnable
 		Pair<Long, V> value = cache.raw(key);
 		if (value != null && System.nanoTime() > value.getKey())
 			cache.remove(key);
+	}
+	
+	private void checkTTL()
+	{
+		for (K key : cache.keys())
+			checkTTL(key);
 	}
 }

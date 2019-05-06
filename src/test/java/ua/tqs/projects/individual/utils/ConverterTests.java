@@ -16,7 +16,7 @@ public class ConverterTests
 	
 	
 	@Before
-	public void Setup()
+	public void setup()
 	{
 		map.put("x", point.x + 2);
 		map.put("y", point.y + 1);

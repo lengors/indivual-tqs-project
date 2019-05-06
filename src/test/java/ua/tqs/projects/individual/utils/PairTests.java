@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Assertions;
 public class PairTests
 {
 	@Test
-	public void Test()
+	public void test()
 	{
 		Pair<String, String> pair = new Pair<>("a", "b");
 		

@@ -72,7 +72,10 @@ public class Cache<K, V> implements ICache<K, V>
 	{
 		Node<Pair<K, V>> node = map.remove(key);
 		if (node != null)
+		{
+			map.remove(key, node);
 			remove(node);
+		}
 	}
 	
 	@Override

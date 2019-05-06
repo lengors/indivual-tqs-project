@@ -3,6 +3,8 @@ package ua.tqs.projects.individual.utils;
 import java.util.Arrays;
 
 import org.junit.Test;
+import org.awaitility.Awaitility;
+import org.junit.After;
 import org.junit.Before;
 
 import org.junit.jupiter.api.Assertions;
@@ -14,19 +16,28 @@ import ua.tqs.projects.individual.entities.City;
 public class TTLCacheTests
 {
 	private TTLCache<String, City> cache;
-	private long ttl;
+	private Thread thread;
 	
 	@Mock
 	private City a, b, c;
 	
 	@Before
-	public void Setup()
+	public void setup()
 	{
-		cache = new TTLCache<>(2, ttl = TTLCache.SECOND);
+		cache = new TTLCache<>(2, TTLCache.SECOND);
+		thread = new Thread(cache);
+		thread.start();
+	}
+	
+	@After
+	public void after() throws InterruptedException
+	{
+		thread.interrupt();
+		thread.join();
 	}
 	
 	@Test
-	public void Test() throws InterruptedException
+	public void test() throws InterruptedException
 	{
 		cache.put("a", a);
 		cache.put("b", b);
@@ -40,13 +51,7 @@ public class TTLCacheTests
 		Assertions.assertEquals(null, cache.get("b"));
 		Assertions.assertEquals(c, cache.get("c"));
 		
-		long current = System.nanoTime(), target = System.nanoTime() + ttl;
-		long amount = target - current;
-		while (amount > 0)
-		{
-			Thread.sleep(amount / (long) 1e6);
-			amount = target - System.nanoTime();
-		}
+		Awaitility.await().until(() -> cache.size() == 0);
 		
 		Assertions.assertEquals(null, cache.get("a"));
 		Assertions.assertEquals(null, cache.get("b"));
