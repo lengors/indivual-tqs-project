@@ -6,6 +6,7 @@ import org.awaitility.Duration;
 import org.awaitility.Awaitility;
 
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -52,6 +53,7 @@ public class InterfaceTests
 	@Test
 	public void testInterface() throws Exception
 	{
+		final int DAYS = 3;
 		driver.get(String.format("http://localhost:%d/", port));
 		driver.findElement(By.id("day")).click();
 		new Select(driver.findElement(By.id("day"))).selectByVisibleText("Tomorrow");
@@ -60,12 +62,13 @@ public class InterfaceTests
 		new Select(driver.findElement(By.id("method"))).selectByVisibleText("By City");
 		driver.findElement(By.id("method")).click();
 		driver.findElement(By.id("days")).click();
-		new Select(driver.findElement(By.id("days"))).selectByVisibleText("3");
+		new Select(driver.findElement(By.id("days"))).selectByVisibleText(String.format("%d", DAYS));
 		driver.findElement(By.id("days")).click();
 		driver.findElement(By.id("city")).click();
 		new Select(driver.findElement(By.id("city"))).selectByVisibleText("Braga");
 		driver.findElement(By.id("city")).click();
-		Awaitility.await().atMost(Duration.TEN_SECONDS).until(() -> driver.findElements(By.className("weekly-column")).size() == 3);
+		Awaitility.await().atMost(Duration.TEN_SECONDS).until(() -> driver.findElements(By.className("weekly-column")).size() == DAYS);
+		Assertions.assertEquals(DAYS, driver.findElements(By.className("weekly-column")).size());
 	}
 
 	@After
