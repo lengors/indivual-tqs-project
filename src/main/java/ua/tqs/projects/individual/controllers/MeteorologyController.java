@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Optional;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 import java.util.function.Consumer;
@@ -195,7 +196,13 @@ public class MeteorologyController
 				Map<String, Object> weatherTypeObject = (Map<String, Object>) weatherType;
 				Integer id = (Integer) weatherTypeObject.get("idWeatherType");
 				WeatherType weatherTypeInstance = weatherTypeRepository.findById(id).orElseGet(WeatherType::new);
-				Converter.FromMap(weatherTypeInstance, weatherTypeObject);
+				try
+				{
+					Converter.fromMap(weatherTypeInstance, weatherTypeObject);
+				} catch (IllegalAccessException | InvocationTargetException e)
+				{
+					e.printStackTrace();
+				}
 				weatherTypeRepository.saveAndFlush(weatherTypeInstance);
 			}
 			result = Requester.Get("http://api.ipma.pt/open-data/wind-speed-daily-classe.json", Requester.AS_MAP);
@@ -208,7 +215,13 @@ public class MeteorologyController
 				Integer id = (Integer) windSpeedClassObject.get(CLASS_WIND_SPEED);
 				WindSpeedClass windSpeedClassInstance = windSpeedClassRepository.findById(id)
 						.orElseGet(WindSpeedClass::new);
-				Converter.FromMap(windSpeedClassInstance, windSpeedClassObject);
+				try
+				{
+					Converter.fromMap(windSpeedClassInstance, windSpeedClassObject);
+				} catch (IllegalAccessException | InvocationTargetException e)
+				{
+					e.printStackTrace();
+				}
 				windSpeedClassRepository.saveAndFlush(windSpeedClassInstance);
 			}
 			result = Requester.Get("http://api.ipma.pt/open-data/distrits-islands.json", Requester.AS_MAP);
@@ -218,7 +231,13 @@ public class MeteorologyController
 				Map<String, Object> cityObject = (Map<String, Object>) city;
 				Integer id = (Integer) cityObject.get("globalIdLocal");
 				City cityInstance = cityRepository.findById(id).orElseGet(City::new);
-				Converter.FromMap(cityInstance, cityObject);
+				try
+				{
+					Converter.fromMap(cityInstance, cityObject);
+				} catch (IllegalAccessException | InvocationTargetException e)
+				{
+					e.printStackTrace();
+				}
 				cityRepository.saveAndFlush(cityInstance);
 			}
 			return null;
