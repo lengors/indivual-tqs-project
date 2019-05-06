@@ -6,10 +6,11 @@ import java.util.List;
 
 public class Cache<K, V> implements ICache<K, V>
 {
-	public static int DEFAULT_MAX_SIZE = 10;
+	public static final int DEFAULT_MAX_SIZE = 10;
 	
 	private HashMap<K, Node<Pair<K, V>>> map = new HashMap<>();
-	private Node<Pair<K, V>> start, end;
+	private Node<Pair<K, V>> start;
+	private Node<Pair<K, V>> end;
 	private int maxCacheSize;
 	
 	public Cache(int maxCacheSize)
@@ -121,7 +122,8 @@ public class Cache<K, V> implements ICache<K, V>
 
 	public static class Node<V>
 	{
-		private Node<V> previous = null, next = null;
+		private Node<V> previous = null;
+		private Node<V> next = null;
 		private V value;
 
 		public Node(V value)

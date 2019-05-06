@@ -11,46 +11,31 @@ import java.lang.reflect.InvocationTargetException;
 
 public class Converter
 {
-	public static Object FromMap(Object object, Map<String, Object> map, String... except)
+	private Converter()
+	{
+	}
+
+	public static Object fromMap(Object object, Map<String, Object> map, String... except)
+			throws SecurityException, IllegalArgumentException, IllegalAccessException, InvocationTargetException
 	{
 		Class<?> clazz = object.getClass();
 		List<String> exceptions = Arrays.asList(except);
 		for (Map.Entry<String, Object> entry : map.entrySet())
 			if (!exceptions.contains(entry.getKey()))
-			{
-				boolean tryMethod = true;
 				try
 				{
 					Field field = clazz.getDeclaredField(entry.getKey());
 					if (Modifier.isPublic(field.getModifiers()))
-					{
 						field.set(object, entry.getValue());
-						tryMethod = false;
-					}
-				} catch (NoSuchFieldException e)
-				{
-				} catch (SecurityException | IllegalArgumentException | IllegalAccessException e)
-				{
-					throw new RuntimeException(e);
-				}
-
-				if (tryMethod)
-					try
+					else
 					{
-						Method method = clazz.getDeclaredMethod(
-								String.format("set%s",
-										entry.getKey().substring(0, 1).toUpperCase() + entry.getKey().substring(1)),
-								entry.getValue().getClass());
+						Method method = clazz.getDeclaredMethod(String.format("set%s", entry.getKey().substring(0, 1).toUpperCase() + entry.getKey().substring(1)), entry.getValue().getClass());
 						if (Modifier.isPublic(method.getModifiers()))
 							method.invoke(object, entry.getValue());
-					} catch (NoSuchMethodException e)
-					{
-					} catch (SecurityException | IllegalAccessException | IllegalArgumentException
-							| InvocationTargetException e)
-					{
-						throw new RuntimeException(e);
 					}
-			}
+				} catch (NoSuchFieldException | NoSuchMethodException e)
+				{
+				}
 		return object;
 	}
 

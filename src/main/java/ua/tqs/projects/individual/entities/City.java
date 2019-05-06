@@ -13,7 +13,8 @@ public class City
 	private Integer idConcelho;
 	private Integer idDistrito;
 
-	private String latitude, longitude;
+	private String latitude;
+	private String longitude;
 	private String idAreaAviso;
 	private String local;
 
