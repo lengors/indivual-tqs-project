@@ -22,23 +22,20 @@ public class Converter
 		List<String> exceptions = Arrays.asList(except);
 		for (Map.Entry<String, Object> entry : map.entrySet())
 			if (!exceptions.contains(entry.getKey()))
-				try
+			{
+				Field field = getDeclaredField(clazz, entry.getKey());
+				if (field != null && Modifier.isPublic(field.getModifiers()))
+					field.set(object, entry.getValue());
+				else
 				{
-					Field field = clazz.getDeclaredField(entry.getKey());
-					if (Modifier.isPublic(field.getModifiers()))
-						field.set(object, entry.getValue());
-					else
-					{
-						Method method = clazz.getDeclaredMethod(
-								String.format("set%s",
-										entry.getKey().substring(0, 1).toUpperCase() + entry.getKey().substring(1)),
-								entry.getValue().getClass());
-						if (Modifier.isPublic(method.getModifiers()))
-							method.invoke(object, entry.getValue());
-					}
-				} catch (NoSuchFieldException | NoSuchMethodException e)
-				{
+					Method method = getDeclaredMethod(clazz,
+							String.format("set%s",
+									entry.getKey().substring(0, 1).toUpperCase() + entry.getKey().substring(1)),
+							entry.getValue().getClass());
+					if (method != null && Modifier.isPublic(method.getModifiers()))
+						method.invoke(object, entry.getValue());
 				}
+			}
 		return object;
 	}
 
@@ -76,5 +73,27 @@ public class Converter
 			}
 		}
 		return map;
+	}
+
+	private static Field getDeclaredField(Class<?> clazz, String name)
+	{
+		try
+		{
+			return clazz.getDeclaredField(name);
+		} catch (NoSuchFieldException e)
+		{
+			return null;
+		}
+	}
+	
+	private static Method getDeclaredMethod(Class<?> clazz, String name, Class<?>... classes)
+	{
+		try
+		{
+			return clazz.getDeclaredMethod(name);
+		} catch (NoSuchMethodException e)
+		{
+			return null;
+		}
 	}
 }
