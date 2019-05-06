@@ -6,12 +6,13 @@ import org.awaitility.Duration;
 import org.awaitility.Awaitility;
 
 import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
+
+import org.junit.jupiter.api.Assertions;
 
 import org.openqa.selenium.support.ui.Select;
 

@@ -5,7 +5,6 @@ import java.util.List;
 import org.hamcrest.Matchers;
 
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 
 import org.springframework.http.MediaType;

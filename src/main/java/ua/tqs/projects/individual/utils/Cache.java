@@ -36,8 +36,11 @@ public class Cache<K, V> implements ICache<K, V>
 		Node<Pair<K, V>> node = map.get(key);
 		if (node != null)
 		{
+			// moves node to the "most" recently used spot
 			remove(node);
 			add(node);
+			
+			// returns associated value
 			return node.getValue().getValue();
 		}
 		return null;
@@ -52,17 +55,26 @@ public class Cache<K, V> implements ICache<K, V>
 	@Override
 	public void put(K key, V value)
 	{
+		// gets key, returns null in case it doesn't exit
 		Node<Pair<K, V>> node = map.get(key);
+		
+		// if key already exists
 		if (node != null)
 		{
+			// updates key's value
 			node.getValue().setValue(value);
+			
+			// moves node to the "most" recently used spot
 			remove(node);
 			add(node);
 		}
 		else
 		{
+			// removes node if the cache max size is reached
 			if (map.size() >= maxCacheSize)
 				remove(map.remove(start.getValue().getKey()));
+			
+			// adds the key and the value to the map
 			map.put(key, add(key, value));
 		}
 	}
@@ -72,10 +84,7 @@ public class Cache<K, V> implements ICache<K, V>
 	{
 		Node<Pair<K, V>> node = map.remove(key);
 		if (node != null)
-		{
-			map.remove(key, node);
 			remove(node);
-		}
 	}
 	
 	@Override
@@ -92,6 +101,7 @@ public class Cache<K, V> implements ICache<K, V>
 		return null;
 	}
 	
+	// add node to linked list
 	private void add(Node<Pair<K, V>> node)
 	{
 		if (end != null)
@@ -101,6 +111,7 @@ public class Cache<K, V> implements ICache<K, V>
 		end = node;
 	}
 	
+	// create and add node to linked list
 	private Node<Pair<K, V>> add(K key, V value)
 	{
 		Node<Pair<K, V>> node = new Node<>(new Pair<>(key, value));
@@ -108,6 +119,7 @@ public class Cache<K, V> implements ICache<K, V>
 		return node;
 	}
 	
+	// remove node from linked list
 	private void remove(Node<Pair<K, V>> node)
 	{
 		Node<Pair<K, V>> previous = node.getPrevious();
