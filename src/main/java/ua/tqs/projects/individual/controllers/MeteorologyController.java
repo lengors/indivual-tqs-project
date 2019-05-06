@@ -15,7 +15,6 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -84,16 +83,7 @@ public class MeteorologyController
 		return get("cities", () ->
 		{
 			List<Object> list = new ArrayList<>();
-			cityRepository.findAll().forEach(city ->
-			{
-				try
-				{
-					list.add(Converter.toMap(city));
-				} catch (IllegalAccessException | InvocationTargetException e)
-				{
-					throw new RethrowException(e);
-				}
-			});
+			cityRepository.findAll().forEach(city -> list.add(Converter.toMap(city)));
 			Map<String, Object> map = new HashMap<>();
 			map.put("data", list);
 			return map;
@@ -115,7 +105,7 @@ public class MeteorologyController
 	{
 		return get(String.format("meteorology?id=%d", id),
 				String.format("http://api.ipma.pt/open-data/forecast/meteorology/cities/daily/%d.json", id),
-				(Map<String, Object> result) -> fix(result, id));
+				result -> fix(result, id));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -126,8 +116,7 @@ public class MeteorologyController
 	public Map<String, Object> getByIdDay(@RequestParam int id, @RequestParam int days)
 	{
 		return get(String.format("meteorology?id=%d&days=%d", id, days),
-				String.format("http://api.ipma.pt/open-data/forecast/meteorology/cities/daily/%d.json", id),
-				(Map<String, Object> result) ->
+				String.format("http://api.ipma.pt/open-data/forecast/meteorology/cities/daily/%d.json", id), result ->
 				{
 					result.put("data",
 							((List<Object>) result.get("data")).subList(0, days >= 1 && days <= 5 ? days : 5));
@@ -138,24 +127,17 @@ public class MeteorologyController
 	@SuppressWarnings("unchecked")
 	private Map<String, Object> fix(Map<String, Object> result, Object... args)
 	{
-		((List<Map<String, Object>>) result.get("data")).forEach((Map<String, Object> instance) ->
+		((List<Map<String, Object>>) result.get("data")).forEach(instance ->
 		{
-			try
-			{
-				instance.put("weatherType",
-						Converter.toMap(weatherTypeRepository.getOne((Integer) instance.get("idWeatherType")),
-								"hibernateLazyInitializer"));
-				instance.put(CLASS_WIND_SPEED,
-						Converter.toMap(windSpeedClassRepository.getOne((Integer) instance.get(CLASS_WIND_SPEED)),
-								"hibernateLazyInitializer"));
-				Optional<City> city = cityRepository
-						.findById(args.length == 0 ? (Integer) instance.get("globalIdLocal") : (Integer) args[0]);
-				if (city.isPresent())
-					instance.put("city", Converter.toMap(city.get()));
-			} catch (IllegalAccessException | InvocationTargetException e)
-			{
-				throw new RethrowException(e);
-			}
+			instance.put("weatherType", Converter.toMap(
+					weatherTypeRepository.getOne((Integer) instance.get("idWeatherType")), "hibernateLazyInitializer"));
+			instance.put(CLASS_WIND_SPEED,
+					Converter.toMap(windSpeedClassRepository.getOne((Integer) instance.get(CLASS_WIND_SPEED)),
+							"hibernateLazyInitializer"));
+			Optional<City> city = cityRepository
+					.findById(args.length == 0 ? (Integer) instance.get("globalIdLocal") : (Integer) args[0]);
+			if (city.isPresent())
+				instance.put("city", Converter.toMap(city.get()));
 		});
 		return result;
 	}
@@ -166,7 +148,7 @@ public class MeteorologyController
 		Statistics statistics = statisticsRepository.findById(key).orElseGet(() -> new Statistics().setKey(key));
 		if ((result = cache.get(key)) == null)
 		{
-			result = Requester.Get(url, Requester.AS_MAP);
+			result = Requester.get(url, Requester.AS_MAP);
 			cache.put(key, result);
 			statistics.setMisses(statistics.getMisses() + 1);
 			consumer.accept(result);
@@ -202,9 +184,9 @@ public class MeteorologyController
 	})
 	private void updateRepository(PlatformTransactionManager transactionManager)
 	{
-		new TransactionTemplate(transactionManager).execute((TransactionStatus status) ->
+		new TransactionTemplate(transactionManager).execute(status ->
 		{
-			Map<String, Object> result = Requester.Get("http://api.ipma.pt/open-data/weather-type-classe.json",
+			Map<String, Object> result = Requester.get("http://api.ipma.pt/open-data/weather-type-classe.json",
 					Requester.AS_MAP);
 			List<Object> weatherTypes = (List<Object>) result.get("data");
 			for (Object weatherType : weatherTypes)
@@ -212,16 +194,10 @@ public class MeteorologyController
 				Map<String, Object> weatherTypeObject = (Map<String, Object>) weatherType;
 				Integer id = (Integer) weatherTypeObject.get("idWeatherType");
 				WeatherType weatherTypeInstance = weatherTypeRepository.findById(id).orElseGet(WeatherType::new);
-				try
-				{
-					Converter.fromMap(weatherTypeInstance, weatherTypeObject);
-				} catch (IllegalAccessException | InvocationTargetException e)
-				{
-					throw new RethrowException(e);
-				}
+				Converter.fromMap(weatherTypeInstance, weatherTypeObject);
 				weatherTypeRepository.saveAndFlush(weatherTypeInstance);
 			}
-			result = Requester.Get("http://api.ipma.pt/open-data/wind-speed-daily-classe.json", Requester.AS_MAP);
+			result = Requester.get("http://api.ipma.pt/open-data/wind-speed-daily-classe.json", Requester.AS_MAP);
 			List<Object> windSpeedClasses = (List<Object>) result.get("data");
 			for (Object windSpeedClass : windSpeedClasses)
 			{
@@ -231,29 +207,17 @@ public class MeteorologyController
 				Integer id = (Integer) windSpeedClassObject.get(CLASS_WIND_SPEED);
 				WindSpeedClass windSpeedClassInstance = windSpeedClassRepository.findById(id)
 						.orElseGet(WindSpeedClass::new);
-				try
-				{
-					Converter.fromMap(windSpeedClassInstance, windSpeedClassObject);
-				} catch (IllegalAccessException | InvocationTargetException e)
-				{
-					throw new RethrowException(e);
-				}
+				Converter.fromMap(windSpeedClassInstance, windSpeedClassObject);
 				windSpeedClassRepository.saveAndFlush(windSpeedClassInstance);
 			}
-			result = Requester.Get("http://api.ipma.pt/open-data/distrits-islands.json", Requester.AS_MAP);
+			result = Requester.get("http://api.ipma.pt/open-data/distrits-islands.json", Requester.AS_MAP);
 			List<Object> cities = (List<Object>) result.get("data");
 			for (Object city : cities)
 			{
 				Map<String, Object> cityObject = (Map<String, Object>) city;
 				Integer id = (Integer) cityObject.get("globalIdLocal");
 				City cityInstance = cityRepository.findById(id).orElseGet(City::new);
-				try
-				{
-					Converter.fromMap(cityInstance, cityObject);
-				} catch (IllegalAccessException | InvocationTargetException e)
-				{
-					throw new RethrowException(e);
-				}
+				Converter.fromMap(cityInstance, cityObject);
 				cityRepository.saveAndFlush(cityInstance);
 			}
 			return null;

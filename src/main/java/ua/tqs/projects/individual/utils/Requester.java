@@ -7,20 +7,25 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.HttpURLConnection;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import org.json.JSONObject;
 
 public class Requester
 {
-	public final static Function<String, String> AS_STRING = (String value) -> value;
-	public final static Function<String, JSONObject> AS_JSON = (String value) -> new JSONObject(value);
-	public final static Function<String, Map<String, Object>> AS_MAP = (String value) -> new JSONObject(value).toMap();
+	public static final UnaryOperator<String> AS_STRING = value -> value;
+	public static final Function<String, JSONObject> AS_JSON = JSONObject::new;
+	public static final Function<String, Map<String, Object>> AS_MAP = value -> new JSONObject(value).toMap();
 	
-	public static <T> T Get(String urlString, Function<String, T> transform)
+	private Requester()
+	{
+	}
+	
+	public static <T> T get(String urlString, Function<String, T> transform)
 	{
 		URL url;
 		HttpURLConnection connection;
@@ -35,7 +40,7 @@ public class Requester
 				BufferedReader in;
 				StringBuilder builder;
 				builder = new StringBuilder();
-				in = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
+				in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
 				while ((inputLine = in.readLine()) != null)
 					builder.append(inputLine);
 				return transform.apply(builder.toString());
@@ -47,12 +52,12 @@ public class Requester
 		}
 		catch (IOException e)
 		{
-			throw new RuntimeException(e);
+			throw new RethrowException(e);
 		}
 	}
 	
-	public static JSONObject Get(String urlString) 
+	public static JSONObject get(String urlString) 
 	{
-		return Get(urlString, AS_JSON);
+		return get(urlString, AS_JSON);
 	}
 }

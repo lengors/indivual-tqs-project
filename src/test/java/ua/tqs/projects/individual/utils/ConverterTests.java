@@ -1,7 +1,6 @@
 package ua.tqs.projects.individual.utils;
 
 import java.awt.Point;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -24,7 +23,7 @@ public class ConverterTests
 	}
 	
 	@Test
-	public void fromMapTest() throws IllegalAccessException, InvocationTargetException
+	public void fromMapTest()
 	{
 		Point p = (Point) Converter.fromMap(new Point(), map);
 		Assertions.assertEquals(map.get("x"), p.x);
@@ -32,7 +31,7 @@ public class ConverterTests
 	}
 	
 	@Test
-	public void toMapTest() throws IllegalAccessException, InvocationTargetException
+	public void toMapTest()
 	{
 		Map<String, Object> result = Converter.toMap(point);
 		Assertions.assertTrue(result.containsKey("x"));

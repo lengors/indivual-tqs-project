@@ -31,28 +31,28 @@ public class RequesterTests
 	@Test
 	public void getAsMapTest()
 	{
-		Map<String, Object> result = Requester.Get("http://api.ipma.pt/open-data/distrits-islands.json", Requester.AS_MAP);
+		Map<String, Object> result = Requester.get("http://api.ipma.pt/open-data/distrits-islands.json", Requester.AS_MAP);
 		Assertions.assertEquals(expectedMap, result);
 	}
 	
 	@Test
 	public void getAsJsonRequesterTest()
 	{
-		JSONObject result = Requester.Get("http://api.ipma.pt/open-data/distrits-islands.json", Requester.AS_JSON);
+		JSONObject result = Requester.get("http://api.ipma.pt/open-data/distrits-islands.json", Requester.AS_JSON);
 		Assertions.assertTrue(expectedJson.similar(result));
 	}
 	
 	@Test
 	public void getAsStringTest()
 	{
-		String result = Requester.Get("http://api.ipma.pt/open-data/distrits-islands.json", Requester.AS_STRING);
+		String result = Requester.get("http://api.ipma.pt/open-data/distrits-islands.json", Requester.AS_STRING);
 		Assertions.assertEquals(expectedString, result);
 	}
 	
 	@Test
 	public void getTest()
 	{
-		JSONObject result = Requester.Get("http://api.ipma.pt/open-data/distrits-islands.json");
+		JSONObject result = Requester.get("http://api.ipma.pt/open-data/distrits-islands.json");
 		Assertions.assertTrue(expectedJson.similar(result));
 	}
 }

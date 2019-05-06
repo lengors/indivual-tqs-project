@@ -41,13 +41,15 @@ public class Pair<K, V>
 		{
 			if (other.key != null)
 				return false;
-		} else if (!key.equals(other.key))
+		}
+		else if (!key.equals(other.key))
 			return false;
 		if (value == null)
 		{
 			if (other.value != null)
 				return false;
-		} else if (!value.equals(other.value))
+		}
+		else if (!value.equals(other.value))
 			return false;
 		return true;
 	}

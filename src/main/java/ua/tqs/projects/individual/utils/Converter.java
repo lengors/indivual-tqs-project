@@ -16,49 +16,58 @@ public class Converter
 	}
 
 	public static Object fromMap(Object object, Map<String, Object> map, String... except)
-			throws IllegalAccessException, InvocationTargetException
 	{
 		Class<?> clazz = object.getClass();
 		List<String> exceptions = Arrays.asList(except);
 		for (Map.Entry<String, Object> entry : map.entrySet())
 			if (!exceptions.contains(entry.getKey()))
-			{
-				Field field = getDeclaredField(clazz, entry.getKey());
-				if (field != null && Modifier.isPublic(field.getModifiers()))
-					field.set(object, entry.getValue());
-				else
+				try
 				{
-					Method method = getDeclaredMethod(clazz,
-							String.format("set%s",
-									entry.getKey().substring(0, 1).toUpperCase() + entry.getKey().substring(1)),
-							entry.getValue().getClass());
-					if (method != null && Modifier.isPublic(method.getModifiers()))
-						method.invoke(object, entry.getValue());
+					Field field = getDeclaredField(clazz, entry.getKey());
+					if (field != null && Modifier.isPublic(field.getModifiers()))
+						field.set(object, entry.getValue());
+					else
+					{
+						Method method = getDeclaredMethod(clazz,
+								String.format("set%s",
+										entry.getKey().substring(0, 1).toUpperCase() + entry.getKey().substring(1)),
+								entry.getValue().getClass());
+						if (method != null && Modifier.isPublic(method.getModifiers()))
+							method.invoke(object, entry.getValue());
+					}
+				} catch (IllegalAccessException | InvocationTargetException e)
+				{
+					throw new RethrowException(e);
 				}
-			}
 		return object;
 	}
 
-	public static Map<String, Object> toMap(Object object, String... except) throws IllegalAccessException, InvocationTargetException
+	public static Map<String, Object> toMap(Object object, String... except)
 	{
 		Class<?> clazz = object.getClass();
 		Map<String, Object> map = new HashMap<>();
 		List<String> exceptions = Arrays.asList(except);
-		for (Field field : clazz.getDeclaredFields())
-			if (!Modifier.isStatic(field.getModifiers()) && Modifier.isPublic(field.getModifiers())
-					&& !exceptions.contains(field.getName()))
-				map.put(field.getName(), field.get(object));
-		for (Method method : clazz.getDeclaredMethods())
+		try
 		{
-			String name = method.getName();
-			if (name.startsWith("get") && !Modifier.isStatic(method.getModifiers())
-					&& Modifier.isPublic(method.getModifiers()))
+			for (Field field : clazz.getDeclaredFields())
+				if (!Modifier.isStatic(field.getModifiers()) && Modifier.isPublic(field.getModifiers())
+						&& !exceptions.contains(field.getName()))
+					map.put(field.getName(), field.get(object));
+			for (Method method : clazz.getDeclaredMethods())
 			{
-				name = name.substring(3);
-				name = name.substring(0, 1).toLowerCase() + name.substring(1);
-				if (!exceptions.contains(name) && !map.containsKey(name))
-					map.put(name, method.invoke(object));
+				String name = method.getName();
+				if (name.startsWith("get") && !Modifier.isStatic(method.getModifiers())
+						&& Modifier.isPublic(method.getModifiers()))
+				{
+					name = name.substring(3);
+					name = name.substring(0, 1).toLowerCase() + name.substring(1);
+					if (!exceptions.contains(name) && !map.containsKey(name))
+						map.put(name, method.invoke(object));
+				}
 			}
+		} catch (IllegalAccessException | InvocationTargetException e)
+		{
+			throw new RethrowException(e);
 		}
 		return map;
 	}
@@ -73,12 +82,12 @@ public class Converter
 			return null;
 		}
 	}
-	
+
 	private static Method getDeclaredMethod(Class<?> clazz, String name, Class<?>... classes)
 	{
 		try
 		{
-			return clazz.getDeclaredMethod(name);
+			return clazz.getDeclaredMethod(name, classes);
 		} catch (NoSuchMethodException e)
 		{
 			return null;
