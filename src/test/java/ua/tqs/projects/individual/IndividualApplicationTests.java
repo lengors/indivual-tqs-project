@@ -9,7 +9,6 @@ import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.jupiter.api.Assertions;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -40,7 +39,7 @@ public class IndividualApplicationTests
 	{
 		// Ensures that the cache is empty before any test
 		meteorologyController.getCache().clear();
-
+		
 		int hits = getStatistic("hits", "cities");
 		int misses = getStatistic("misses", "cities");
 		int requests = getStatistic("requests", "cities");
